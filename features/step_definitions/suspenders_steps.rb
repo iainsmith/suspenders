@@ -55,6 +55,12 @@ Then %r{"(.*)" should not be installed} do |gem_name|
   end
 end
 
+Then %r{"(.*)" should be installed} do |gem_name|
+  in_current_dir do
+    system("bundle show #{gem_name} 2>&1 > /dev/null").should be_true
+  end
+end
+
 Then %r{"(.*)" should not be included in "(.*)"} do |content, file_path|
   check_file_content file_path, content, false
 end

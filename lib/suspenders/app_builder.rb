@@ -159,6 +159,15 @@ module Suspenders
         :after => 'RSpec.configure do |config|'
     end
 
+    def set_background_worker_to_sidekiq
+      replace_in_file "Gemfile", 
+        "gem 'delayed_job_active_record', '>= 4.0.0.beta2'",
+        "gem 'sidekiq'"
+      replace_in_file "Procfile",
+        "worker: bundle exec rake jobs:work",
+        "worker: bundle exec sidekiq"
+    end
+
     def configure_background_jobs_for_rspec
       copy_file 'background_jobs_rspec.rb', 'spec/support/background_jobs.rb'
       run 'rails g delayed_job:active_record'

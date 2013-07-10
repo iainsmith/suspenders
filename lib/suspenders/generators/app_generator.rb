@@ -15,6 +15,9 @@ module Suspenders
     class_option :skip_test_unit, :type => :boolean, :aliases => '-T', :default => true,
       :desc => 'Skip Test::Unit files'
 
+    class_option :background_worker, :type => :string, :aliases => '-b', :default => 'delayedjob',
+      :desc => 'Select background woker type'
+
     def finish_template
       invoke :suspenders_customization
       super
@@ -39,6 +42,7 @@ module Suspenders
       invoke :setup_git
       invoke :create_heroku_apps
       invoke :create_github_repo
+      invoke :setup_background_worker
       invoke :outro
     end
 
@@ -77,7 +81,6 @@ module Suspenders
       build :test_factories_first
       build :generate_rspec
       build :configure_rspec
-      build :configure_background_jobs_for_rspec
       build :enable_database_cleaner
       build :configure_capybara_webkit
       build :setup_guard_spork
@@ -148,6 +151,15 @@ module Suspenders
       if options[:github]
         say 'Creating Github repo'
         build :create_github_repo, options[:github]
+      end
+    end
+
+    def setup_background_worker
+      if 'sidekiq' == options[:background_worker]
+        build :set_background_worker_to_sidekiq
+        bundle_command 'install --binstubs=bin/stubs'
+      else
+        build :configure_rspec_background_jobs_for_rspec
       end
     end
 
